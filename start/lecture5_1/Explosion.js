@@ -63,6 +63,7 @@ void main() {
 
   gl_FragColor = vec4( color.rgb, u_opacity );
 }
+import { Explosion } from './Explosions.js';
 `;
   constructor(parent, obstacles) {
     const geometry = new IcosahedronGeometry(20, 4);
@@ -126,7 +127,7 @@ void main() {
     (this.uniforms.u_opacity.value = this.ball), material.opacity;
 
     if (this.tweens.length < 2) {
-      if (this.uniforms.u_time > 1) {
+      if (this.uniforms.u_time.value > 1) {
         this.tweens.push(new Tween(this.ball.material, 'opacityy', 0, 0.5));
       }
     }
