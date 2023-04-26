@@ -69,7 +69,15 @@ void main() {
 
     this.obstacle = obstacles;
 
-    this.uniforms;
+    this.uniforms = {
+      u_time: { value: 0 },
+      u_opacity: { value: 0.6 },
+      u_tex: {
+        value: new TextureLoader().load(
+          `${game.assetsPath}plane/explosion.png`
+        ),
+      },
+    };
   }
 
   onComplete() {}
