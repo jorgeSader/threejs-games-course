@@ -5,89 +5,125 @@ import { RGBELoader } from '../../libs/three137/RGBELoader.js';
 import { OrbitControls } from '../../libs/three137/OrbitControls.js';
 import { LoadingBar } from '../../libs/LoadingBar.js';
 
-class Game{
-	constructor(){
-		const container = document.createElement( 'div' );
-		document.body.appendChild( container );
-        
-		this.clock = new THREE.Clock();
+class Game {
+  constructor() {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
 
-        this.loadingBar = new LoadingBar();
-        this.loadingBar.visible = false;
+    this.clock = new THREE.Clock();
 
-		this.assetsPath = '../../assets/';
-        
-		this.camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 50 );
-		this.camera.position.set( 1, 1.7, 2.8 );
-        
-		let col = 0x605550;
-		this.scene = new THREE.Scene();
-		this.scene.background = new THREE.Color( col );
-		
-		const ambient = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-		this.scene.add(ambient);
+    this.loadingBar = new LoadingBar();
+    this.loadingBar.visible = false;
 
-        const light = new THREE.DirectionalLight();
-        light.position.set( 0.2, 1, 1 );
-			
-		this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true } );
-		this.renderer.setPixelRatio( window.devicePixelRatio );
-		this.renderer.setSize( window.innerWidth, window.innerHeight );
-        this.renderer.outputEncoding = THREE.sRGBEncoding;
-		container.appendChild( this.renderer.domElement );
-        this.setEnvironment();
-        
-        const controls = new OrbitControls( this.camera, this.renderer.domElement );
-        controls.target.set(0, 1, 0);
-		controls.update();
+    this.assetsPath = '../../assets/';
 
-        this.loadEve();
-		
-		window.addEventListener('resize', this.resize.bind(this) );
-        
-	}
-	
-    resize(){
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-    	this.camera.updateProjectionMatrix();
-    	this.renderer.setSize( window.innerWidth, window.innerHeight ); 
-    }
-    
-    setEnvironment(){
-        const loader = new RGBELoader().setPath(this.assetsPath);
-        const pmremGenerator = new THREE.PMREMGenerator( this.renderer );
-        pmremGenerator.compileEquirectangularShader();
-        
-        const self = this;
-        
-        loader.load( 'hdr/factory.hdr', ( texture ) => {
-          const envMap = pmremGenerator.fromEquirectangular( texture ).texture;
-          pmremGenerator.dispose();
+    this.camera = new THREE.PerspectiveCamera(
+      45,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      50
+    );
+    this.camera.position.set(1, 1.7, 2.8);
 
-          self.scene.environment = envMap;
+    let col = 0x605550;
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(col);
 
-        }, undefined, (err)=>{
-            console.error( err.message );
-        } );
-    }
+    const ambient = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+    this.scene.add(ambient);
 
-    loadEve(){
-    	
-	}			
-    
-	newAnim(){
-		
-	}
+    const light = new THREE.DirectionalLight();
+    light.position.set(0.2, 1, 1);
 
-	set action(name){
-		
-	}
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.outputEncoding = THREE.sRGBEncoding;
+    container.appendChild(this.renderer.domElement);
+    this.setEnvironment();
 
-	render() {
-		const dt = this.clock.getDelta();
+    const controls = new OrbitControls(this.camera, this.renderer.domElement);
+    controls.target.set(0, 1, 0);
+    controls.update();
 
-        this.renderer.render( this.scene, this.camera );
-    }
+    this.loadEve();
+
+    window.addEventListener('resize', this.resize.bind(this));
+  }
+
+  resize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  setEnvironment() {
+    const loader = new RGBELoader().setPath(this.assetsPath);
+    const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+    pmremGenerator.compileEquirectangularShader();
+
+    const self = this;
+
+    loader.load(
+      'hdr/factory.hdr',
+      (texture) => {
+        const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+        pmremGenerator.dispose();
+
+        self.scene.environment = envMap;
+      },
+      undefined,
+      (err) => {
+        console.error(err.message);
+      }
+    );
+  }
+
+  loadEve() {
+    const loader = new GLTFLoader().setPath(`${this.assetsPath}factory/`);
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('../../libs/three128/draco/');
+    loader.setDRACOLoader(dracoLoader);
+
+    this.loadingBar.visible = true;
+
+    loader.load(
+      'eve.glb',
+      (gltf) => {
+        this.scene.add(gltf.scene);
+        this.eve = gltf.scene;
+        this.mixer = new THREE.AnimationMixer(gltf.scene);
+
+        this.animations = {};
+
+        gltf.animations.forEach((animation) => {
+          this.animations[animation.name.toLowerCase()] = animation;
+
+          this.actionName = '';
+
+          this.newAnim();
+        });
+      },
+      (xhr) => {
+        this.loadingBar.progress = xhr.loader / xhr.total;
+      },
+      (err) => {
+        console.error(err);
+      }
+    );
+  }
+
+  newAnim() {}
+
+  set action(name) {}
+
+  render() {
+    const dt = this.clock.getDelta();
+
+    if (this.mixer !== undefined) this.mixer.update(dt);
+
+    this.renderer.render(this.scene, this.camera);
+  }
 }
 
 export { Game };
