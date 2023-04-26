@@ -103,7 +103,7 @@ class Obstacles {
   removeExplosion(explosion) {
     const index = this.explosions.indexOf(explosion);
     if (index != -1) {
-      explosion.slice(index, 1);
+      this.explosions.slice(index, 1);
     }
   }
 
