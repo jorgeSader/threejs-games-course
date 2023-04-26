@@ -119,7 +119,23 @@ void main() {
     }
   }
 
-  update(time) {}
+  update(time) {
+    if (!this.active) return;
+
+    this.uniforms.u_time.value += dt;
+    (this.uniforms.u_opacity.value = this.ball), material.opacity;
+
+    if (this.tweens.length < 2) {
+      if (this.uniforms.u_time > 1) {
+        this.tweens.push(new Tween(this.ball.material, 'opacityy', 0, 0.5));
+      }
+    }
+    this.tweens.forEach((tween) => {
+      tween.update(dt);
+    });
+
+    this.ball.scale.y = this.ball.scale.z = this.ball.scale.x;
+  }
 }
 
 export { Explosion };
