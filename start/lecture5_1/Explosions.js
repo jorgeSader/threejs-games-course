@@ -78,9 +78,46 @@ void main() {
         ),
       },
     };
+    ShaderChunk.noise = noise;
+
+    const material = new ShaderMaterial({
+      uniforms: this.uniforms,
+      vertexShader: Explosion.vshader,
+      fragmenShader: Explosion.fshader,
+      transparent: true,
+    });
+
+    this.ball = new Mesh(geometry, material);
+
+    const scale = 0.5;
+    this.ball.scale.set(scale, scale, scale);
+    parent.add(this.ball);
+
+    this.tweens = [];
+    this.tweens.push(
+      new Tween(
+        this.ball.scale,
+        'x',
+        0.2,
+        1.5,
+        this.onComplete.bind(this),
+        'outQuad'
+      )
+    );
+
+    this.active = true;
   }
 
-  onComplete() {}
+  onComplete() {
+    this.ball.parent.remove(this.ball);
+    this.tweens = [];
+    this.active = false;
+    this.ball.geometry.dispose();
+    this.ball.material.dispose();
+    if (this.obstacles) {
+      this.obstacles.removeExplosion(this);
+    }
+  }
 
   update(time) {}
 }
