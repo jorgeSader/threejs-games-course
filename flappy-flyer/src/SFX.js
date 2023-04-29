@@ -7,7 +7,7 @@ import {
 
 class SFX {
   constructor(camera, assetsPath, listener) {
-    if (listener === null) {
+    if (!listener) {
       this.listener = new AudioListener();
       camera.add(this.listener);
     } else {

@@ -76,11 +76,11 @@ class Game {
     this.bonusScore = 0;
     this.lives = 3;
 
-    let scoreEl = document.getElementById('score');
-    scoreEl.innerHTML = this.score;
+    let elm = document.getElementById('score');
+    elm.innerHTML = this.score;
 
-    let livesEl = document.getElementById('lives');
-    livesEl.innerHTML = this.lives;
+    elm = document.getElementById('lives');
+    elm.innerHTML = this.lives;
 
     this.plane.reset();
     this.obstacles.reset();
@@ -96,27 +96,27 @@ class Game {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  keyDown(e) {
-    switch (e.keyCode) {
+  keyDown(evt) {
+    switch (evt.keyCode) {
       case 32:
         this.spaceKey = true;
         break;
     }
   }
 
-  keyUp(e) {
-    switch (e.keyCode) {
+  keyUp(evt) {
+    switch (evt.keyCode) {
       case 32:
         this.spaceKey = false;
         break;
     }
   }
 
-  mouseDown(e) {
+  mouseDown(evt) {
     this.spaceKey = true;
   }
 
-  mouseUp(e) {
+  mouseUp(evt) {
     this.spaceKey = false;
   }
 
@@ -125,13 +125,15 @@ class Game {
     const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
     pmremGenerator.compileEquirectangularShader();
 
+    const self = this;
+
     loader.load(
       'hdr/venice_sunset_1k.hdr',
       (texture) => {
         const envMap = pmremGenerator.fromEquirectangular(texture).texture;
         pmremGenerator.dispose();
 
-        this.scene.environment = envMap;
+        self.scene.environment = envMap;
       },
       undefined,
       (err) => {
@@ -152,7 +154,7 @@ class Game {
   }
 
   loadSFX() {
-    this.sfx = new SFX(this.camera, `${this.assetsPath}plane/`);
+    this.sfx = new SFX(this.camera, this.assetsPath + 'plane/');
 
     this.sfx.load('explosion');
     this.sfx.load('engine', true);
@@ -190,26 +192,26 @@ class Game {
   incScore() {
     this.score++;
 
-    const scoreEl = document.getElementById('score');
+    const elm = document.getElementById('score');
 
-    if (this.score % 3 === 0) {
+    if (this.score % 3 == 0) {
       this.bonusScore += 3;
       this.sfx.play('bonus');
     } else {
       this.sfx.play('gliss');
     }
 
-    scoreEl.innerHTML = this.score + this.bonusScore;
+    elm.innerHTML = this.score + this.bonusScore;
   }
 
   decLives() {
     this.lives--;
 
-    const livesEl = document.getElementById('lives');
+    const elm = document.getElementById('lives');
 
-    livesEl.innerHTML = this.lives;
+    elm.innerHTML = this.lives;
 
-    if (this.lives === 0) setTimeout(this.gameOver().bind(this), 1200);
+    if (this.lives == 0) setTimeout(this.gameOver.bind(this), 1200);
 
     this.sfx.play('explosion');
   }

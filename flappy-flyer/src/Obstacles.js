@@ -13,15 +13,16 @@ class Obstacles {
     this.tmpPos = new Vector3();
     this.explosions = [];
   }
+
   loadStar() {
     const loader = new GLTFLoader().setPath(`${this.assetsPath}plane/`);
     this.ready = false;
 
     // Load a glTF resource
     loader.load(
-      //resource URL
+      // resource URL
       'star.glb',
-      //called when resource is loaded
+      // called when the resource is loaded
       (gltf) => {
         this.star = gltf.scene.children[0];
 
@@ -29,13 +30,14 @@ class Obstacles {
 
         if (this.bomb !== undefined) this.initialize();
       },
-
-      //called whil loading is progressing
+      // called while loading is progressing
       (xhr) => {
         this.loadingBar.update('star', xhr.loaded, xhr.total);
       },
       // called when loading has errors
-      (err) => console.error(err)
+      (err) => {
+        console.error(err);
+      }
     );
   }
 
@@ -44,23 +46,22 @@ class Obstacles {
 
     // Load a glTF resource
     loader.load(
-      //resource URL
+      // resource URL
       'bomb.glb',
-      //called when resource is loaded
+      // called when the resource is loaded
       (gltf) => {
         this.bomb = gltf.scene.children[0];
 
-        // this.bomb.name = 'bomb';
-
-        if (this.bomb !== undefined) this.initialize();
+        if (this.star !== undefined) this.initialize();
       },
-
-      //called whil loading is progressing
+      // called while loading is progressing
       (xhr) => {
         this.loadingBar.update('bomb', xhr.loaded, xhr.total);
       },
       // called when loading has errors
-      (err) => console.error(err)
+      (err) => {
+        console.error(err);
+      }
     );
   }
 
@@ -77,7 +78,7 @@ class Obstacles {
 
     let rotate = true;
 
-    for (let y = 7.5; y > -8; y -= 2.5) {
+    for (let y = 5; y > -8; y -= 2.5) {
       rotate = !rotate;
       if (y == 0) continue;
       const bomb = this.bomb.clone();
@@ -97,21 +98,20 @@ class Obstacles {
     }
 
     this.reset();
+
     this.ready = true;
   }
 
   removeExplosion(explosion) {
     const index = this.explosions.indexOf(explosion);
-    if (index != -1) {
-      this.explosions.slice(index, 1);
-    }
+    if (index != -1) this.explosions.indexOf(index, 1);
   }
 
   reset() {
     this.obstacleSpawn = { pos: 20, offset: 5 };
     this.obstacles.forEach((obstacle) => this.respawnObstacle(obstacle));
 
-    let count = 0;
+    let count;
     while (this.explosions.length > 0 && count < 100) {
       this.explosions[0].onComplete();
       count++;
@@ -130,7 +130,7 @@ class Obstacles {
     });
   }
 
-  update(pos) {
+  update(pos, time) {
     let collisionObstacle;
 
     this.obstacles.forEach((obstacle) => {
@@ -143,12 +143,11 @@ class Obstacles {
         this.respawnObstacle(obstacle);
       }
     });
-    if (collisionObstacle !== undefined) {
-      const planePos = this.game.plane.position;
 
+    if (collisionObstacle !== undefined) {
       collisionObstacle.children.some((child) => {
         child.getWorldPosition(this.tmpPos);
-        const dist = this.tmpPos.distanceToSquared(planePos);
+        const dist = this.tmpPos.distanceToSquared(pos);
         if (dist < 5) {
           collisionObstacle.userData.hit = true;
           this.hit(child);
@@ -158,18 +157,18 @@ class Obstacles {
     }
 
     this.explosions.forEach((explosion) => {
-      explosion.update(dt);
+      explosion.update(time);
     });
   }
 
   hit(obj) {
     if (obj.name == 'star') {
+      obj.visible = false;
       this.game.incScore();
     } else {
       this.explosions.push(new Explosion(obj, this));
       this.game.decLives();
     }
-    obj.visible = false;
   }
 }
 
