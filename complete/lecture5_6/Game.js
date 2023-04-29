@@ -5,244 +5,248 @@ import { Plane } from './Plane.js';
 import { Obstacles } from './Obstacles.js';
 import { SFX } from '../../libs/SFX.js';
 
-class Game{
-	constructor(){
-		const container = document.createElement( 'div' );
-		document.body.appendChild( container );
-        
-        this.loadingBar = new LoadingBar();
-        this.loadingBar.visible = false;
+class Game {
+  constructor() {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
 
-        this.clock = new THREE.Clock();
+    this.loadingBar = new LoadingBar();
+    this.loadingBar.visible = false;
 
-		this.assetsPath = '../../assets/';
-        
-		this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 100 );
-        this.camera.position.set( -4.37, 0, -4.75 );
-        this.camera.lookAt(0, 0, 6);
+    this.clock = new THREE.Clock();
 
-        this.cameraController = new THREE.Object3D();
-        this.cameraController.add(this.camera);
-        this.cameraTarget = new THREE.Vector3(0,0,6);
-        
-		this.scene = new THREE.Scene();
-        this.scene.add(this.cameraController);
+    this.assetsPath = '../../assets/';
 
-		const ambient = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-        ambient.position.set( 0.5, 1, 0.25 );
-		this.scene.add(ambient);
-			
-		this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true } );
-		this.renderer.setPixelRatio( window.devicePixelRatio );
-		this.renderer.setSize( window.innerWidth, window.innerHeight );
-        this.renderer.outputEncoding = THREE.sRGBEncoding;
-		container.appendChild( this.renderer.domElement );
-        this.setEnvironment();
-        
-        this.active = false;
-        this.load();
+    this.camera = new THREE.PerspectiveCamera(
+      70,
+      window.innerWidth / window.innerHeight,
+      0.01,
+      100
+    );
+    this.camera.position.set(-4.37, 0, -4.75);
+    this.camera.lookAt(0, 0, 6);
 
-        window.addEventListener('resize', this.resize.bind(this) );
+    this.cameraController = new THREE.Object3D();
+    this.cameraController.add(this.camera);
+    this.cameraTarget = new THREE.Vector3(0, 0, 6);
 
-        document.addEventListener('keydown', this.keyDown.bind(this));
-        document.addEventListener('keyup', this.keyUp.bind(this));
+    this.scene = new THREE.Scene();
+    this.scene.add(this.cameraController);
 
-        document.addEventListener('touchstart', this.mouseDown.bind(this) );
-        document.addEventListener('touchend', this.mouseUp.bind(this) );
-        document.addEventListener('mousedown', this.mouseDown.bind(this) );
-        document.addEventListener('mouseup', this.mouseUp.bind(this) );
-        
-        this.spaceKey = false;
+    const ambient = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+    ambient.position.set(0.5, 1, 0.25);
+    this.scene.add(ambient);
 
-        const btn = document.getElementById('playBtn');
-        btn.addEventListener('click', this.startGame.bind(this));
-	}
-	
-    startGame(){
-        const gameover = document.getElementById('gameover');
-        const instructions = document.getElementById('instructions');
-        const btn = document.getElementById('playBtn');
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.outputEncoding = THREE.sRGBEncoding;
+    container.appendChild(this.renderer.domElement);
+    this.setEnvironment();
 
-        gameover.style.display = 'none';
-        instructions.style.display = 'none';
-        btn.style.display = 'none';
+    this.active = false;
+    this.load();
 
-        this.score = 0;
-        this.bonusScore = 0;
-        this.lives = 3;
+    window.addEventListener('resize', this.resize.bind(this));
 
-        let elm = document.getElementById('score');
-        elm.innerHTML = this.score;
-        
-        elm = document.getElementById('lives');
-        elm.innerHTML = this.lives;
+    document.addEventListener('keydown', this.keyDown.bind(this));
+    document.addEventListener('keyup', this.keyUp.bind(this));
 
-        this.plane.reset();
-        this.obstacles.reset();
+    document.addEventListener('touchstart', this.mouseDown.bind(this));
+    document.addEventListener('touchend', this.mouseUp.bind(this));
+    document.addEventListener('mousedown', this.mouseDown.bind(this));
+    document.addEventListener('mouseup', this.mouseUp.bind(this));
 
-        this.active = true;
+    this.spaceKey = false;
 
-        this.sfx.play('engine');
-    }
+    const btn = document.getElementById('playBtn');
+    btn.addEventListener('click', this.startGame.bind(this));
+  }
 
-    resize(){
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-    	this.camera.updateProjectionMatrix();
-    	this.renderer.setSize( window.innerWidth, window.innerHeight ); 
-    }
+  startGame() {
+    const gameover = document.getElementById('gameover');
+    const instructions = document.getElementById('instructions');
+    const btn = document.getElementById('playBtn');
 
-    keyDown(evt){
-        switch(evt.keyCode){
-            case 32:
-                this.spaceKey = true; 
-                break;
-        }
-    }
-    
-    keyUp(evt){
-        switch(evt.keyCode){
-            case 32:
-                this.spaceKey = false;
-                break;
-        }
-    }
+    gameover.style.display = 'none';
+    instructions.style.display = 'none';
+    btn.style.display = 'none';
 
-    mouseDown(evt){
+    this.score = 0;
+    this.bonusScore = 0;
+    this.lives = 3;
+
+    let elm = document.getElementById('score');
+    elm.innerHTML = this.score;
+
+    elm = document.getElementById('lives');
+    elm.innerHTML = this.lives;
+
+    this.plane.reset();
+    this.obstacles.reset();
+
+    this.active = true;
+
+    this.sfx.play('engine');
+  }
+
+  resize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  keyDown(evt) {
+    switch (evt.keyCode) {
+      case 32:
         this.spaceKey = true;
+        break;
     }
+  }
 
-    mouseUp(evt){
+  keyUp(evt) {
+    switch (evt.keyCode) {
+      case 32:
         this.spaceKey = false;
+        break;
     }
+  }
 
-    setEnvironment(){
-        const loader = new RGBELoader().setPath(this.assetsPath);
-        const pmremGenerator = new THREE.PMREMGenerator( this.renderer );
-        pmremGenerator.compileEquirectangularShader();
-        
-        const self = this;
-        
-        loader.load( 'hdr/venice_sunset_1k.hdr', ( texture ) => {
-          const envMap = pmremGenerator.fromEquirectangular( texture ).texture;
-          pmremGenerator.dispose();
+  mouseDown(evt) {
+    this.spaceKey = true;
+  }
 
-          self.scene.environment = envMap;
+  mouseUp(evt) {
+    this.spaceKey = false;
+  }
 
-        }, undefined, (err)=>{
-            console.error( err.message );
-        } );
-    }
-    
-	load(){
-        this.loadSkybox();
-        this.loading = true;
-        this.loadingBar.visible = true;
+  setEnvironment() {
+    const loader = new RGBELoader().setPath(this.assetsPath);
+    const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+    pmremGenerator.compileEquirectangularShader();
 
-        this.plane = new Plane(this);
-        this.obstacles = new Obstacles(this);
+    const self = this;
 
-        this.loadSFX();
-    }
+    loader.load(
+      'hdr/venice_sunset_1k.hdr',
+      (texture) => {
+        const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+        pmremGenerator.dispose();
 
-    loadSFX(){
-        this.sfx = new SFX(this.camera, this.assetsPath + 'plane/');
+        self.scene.environment = envMap;
+      },
+      undefined,
+      (err) => {
+        console.error(err.message);
+      }
+    );
+  }
 
-        this.sfx.load('explosion');
-        this.sfx.load('engine', true);
-        this.sfx.load('gliss');
-        this.sfx.load('gameover');
-        this.sfx.load('bonus');
-    }
+  load() {
+    this.loadSkybox();
+    this.loading = true;
+    this.loadingBar.visible = true;
 
-    loadSkybox(){
-        this.scene.background = new THREE.CubeTextureLoader()
-	        .setPath( `${this.assetsPath}/plane/paintedsky/` )
-            .load( [
-                'px.jpg',
-                'nx.jpg',
-                'py.jpg',
-                'ny.jpg',
-                'pz.jpg',
-                'nz.jpg'
-            ], () => {
-                this.renderer.setAnimationLoop(this.render.bind(this));
-            } );
-    }
-    
-    gameOver(){
-        this.active = false;
+    this.plane = new Plane(this);
+    this.obstacles = new Obstacles(this);
 
-        const gameover = document.getElementById('gameover');
-        const btn = document.getElementById('playBtn');
+    this.loadSFX();
+  }
 
-        gameover.style.display = 'block';
-        btn.style.display = 'block';
+  loadSFX() {
+    this.sfx = new SFX(this.camera, this.assetsPath + 'plane/');
 
-        this.plane.visible = false;
+    this.sfx.load('explosion');
+    this.sfx.load('engine', true);
+    this.sfx.load('gliss');
+    this.sfx.load('gameover');
+    this.sfx.load('bonus');
+  }
 
-        this.sfx.stopAll();
-        this.sfx.play('gameover');
-    }
-
-    incScore(){
-        this.score++;
-
-        const elm = document.getElementById('score');
-
-        if (this.score % 3==0){
-            this.bonusScore += 3;
-            this.sfx.play('bonus');
-        }else{
-            this.sfx.play('gliss');
+  loadSkybox() {
+    this.scene.background = new THREE.CubeTextureLoader()
+      .setPath(`${this.assetsPath}/plane/paintedsky/`)
+      .load(
+        ['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'],
+        () => {
+          this.renderer.setAnimationLoop(this.render.bind(this));
         }
+      );
+  }
 
-        elm.innerHTML = this.score + this.bonusScore;
+  gameOver() {
+    this.active = false;
+
+    const gameover = document.getElementById('gameover');
+    const btn = document.getElementById('playBtn');
+
+    gameover.style.display = 'block';
+    btn.style.display = 'block';
+
+    this.plane.visible = false;
+
+    this.sfx.stopAll();
+    this.sfx.play('gameover');
+  }
+
+  incScore() {
+    this.score++;
+
+    const elm = document.getElementById('score');
+
+    if (this.score % 3 == 0) {
+      this.bonusScore += 3;
+      this.sfx.play('bonus');
+    } else {
+      this.sfx.play('gliss');
     }
 
-    decLives(){
-        this.lives--;
+    elm.innerHTML = this.score + this.bonusScore;
+  }
 
-        const elm = document.getElementById('lives');
+  decLives() {
+    this.lives--;
 
-        elm.innerHTML = this.lives;
+    const elm = document.getElementById('lives');
 
-        if (this.lives==0) setTimeout(this.gameOver.bind(this), 1200);
+    elm.innerHTML = this.lives;
 
-        this.sfx.play('explosion');
+    if (this.lives == 0) setTimeout(this.gameOver.bind(this), 1200);
+
+    this.sfx.play('explosion');
+  }
+
+  updateCamera() {
+    this.cameraController.position.copy(this.plane.position);
+    this.cameraController.position.y = 0;
+    this.cameraTarget.copy(this.plane.position);
+    this.cameraTarget.z += 6;
+    this.camera.lookAt(this.cameraTarget);
+  }
+
+  render() {
+    if (this.loading) {
+      if (this.plane.ready && this.obstacles.ready) {
+        this.loading = false;
+        this.loadingBar.visible = false;
+      } else {
+        return;
+      }
     }
 
-    updateCamera(){
-        this.cameraController.position.copy( this.plane.position );
-        this.cameraController.position.y = 0;
-        this.cameraTarget.copy(this.plane.position);
-        this.cameraTarget.z += 6;
-        this.camera.lookAt( this.cameraTarget );
+    const dt = this.clock.getDelta();
+    const time = this.clock.getElapsedTime();
+
+    this.plane.update(time);
+
+    if (this.active) {
+      this.obstacles.update(this.plane.position, dt);
     }
 
-	render() {
-        if (this.loading){
-            if (this.plane.ready && this.obstacles.ready){
-                this.loading = false;
-                this.loadingBar.visible = false;
-            }else{
-                return;
-            }
-        }
+    this.updateCamera();
 
-        const dt = this.clock.getDelta();
-        const time = this.clock.getElapsedTime();
-
-        this.plane.update(time);
-
-        if (this.active){
-            this.obstacles.update(this.plane.position, dt);
-        }
-    
-        this.updateCamera();
-    
-        this.renderer.render( this.scene, this.camera );
-
-    }
+    this.renderer.render(this.scene, this.camera);
+  }
 }
 
 export { Game };
