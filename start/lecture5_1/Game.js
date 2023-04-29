@@ -3,6 +3,7 @@ import { RGBELoader } from '../../libs/three137/RGBELoader.js';
 import { LoadingBar } from '../../libs/LoadingBar.js';
 import { Plane } from './Plane.js';
 import { Obstacles } from './Obstacles.js';
+import { SFX } from './SFX.js';
 
 class Game {
   constructor() {
@@ -82,6 +83,8 @@ class Game {
     this.obstacles.reset();
 
     this.active = true;
+
+    this.sfx.play('engine');
   }
 
   mouseDown(e) {
@@ -140,6 +143,17 @@ class Game {
 
     this.plane = new Plane(this);
     this.obstacles = new Obstacles(this);
+
+    this.loadSFX();
+  }
+
+  loadSFX() {
+    this.sfx = new SFX(this.camera, this.assetsPath + 'plane/');
+
+    this.sfx.load('explosion');
+    this.sfx.load('engine', true, 1);
+    this.sfx.load('gliss');
+    this.sfx.load('gameover');
   }
 
   loadSkybox() {
@@ -161,6 +175,9 @@ class Game {
 
     gameover.style.display = 'block';
     btn.style.display = 'block';
+
+    this.sfx.stopAll();
+    this.sfx.play('gameover');
   }
 
   incScore() {
@@ -168,6 +185,8 @@ class Game {
 
     const scoreEl = document.getElementById('score');
     scoreEl.innerHTML = this.score;
+
+    this.sfx.play('gliss');
   }
 
   decLives() {
@@ -176,6 +195,8 @@ class Game {
     livesEl.innerHTML = this.lives;
 
     if (this.lives === 0) this.gameOver();
+
+    this.sfx.play('explosion');
   }
 
   updateCamera() {
