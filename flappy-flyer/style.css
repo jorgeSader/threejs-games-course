@@ -21,7 +21,8 @@ body {
   font-family: 'RocknRoll One', sans-serif;
   font-size: 30px;
   color: darkblue;
-  width: 300px;
+  min-width: 300px;
+  max-width: 650px;
   left: 50%;
   transform: translateX(-50%);
   border-radius: 20px;
